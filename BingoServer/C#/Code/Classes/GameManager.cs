@@ -190,14 +190,13 @@ namespace BingoServer.Classes
                             //Obtiene el mensaje del cliente al conectar
                             NetworkStream networkStream = clientSocket.GetStream();
                             networkStream.Read(bytesFrom, 0, 1024);
-                            string info = Utils.SatinizeBytes(bytesFrom);
-                            string infoCliente = info.Split(':').Last().TrimStart('#').TrimEnd('#');
+                            Tuple<Utils.MessageType, string, string> info = Utils.CastMessage(bytesFrom);
 
                             //añade el cliente a la coleccion del gestor
-                            this.clientManager.AddClient(new ClientSocket(infoCliente, clientSocket));
+                            this.clientManager.AddClient(new ClientSocket(info.Item3, clientSocket));
                             Console.WriteLine("Jugador " + this.clientManager.GetCount() + " Se unio al juego...");
                             //se envian mensajes de que un nuevo jugador se a conectado
-                            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", infoCliente + " Se a unido al juego...");
+                            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", info.Item3 + " Se a unido al juego...");
                             this.clientManager.SendMessage(Utils.MessageType.Chat,
                                                           "Bingo",
                                                           $"Faltan {this.players - this.clientManager.GetCount()} jugadores para empezar el BINGO");

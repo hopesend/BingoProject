@@ -110,10 +110,10 @@ namespace BingoServer.Classes
                             NetworkStream networkStream = this.socket.GetStream();
                             networkStream.Read(bytesFrom, 0, 1024);
                             //Limpia el mensaje y si es un mensaje formateado correctamente emite el evento
-                            string message = Utils.SatinizeBytes(bytesFrom);
-                            if (!string.IsNullOrEmpty(message))
+                            Tuple<Utils.MessageType, string, string> message = Utils.CastMessage(bytesFrom);
+                            if (message != null)
                             {
-                                OnClientMessageReceived?.Invoke(null, new ClientMessageReceivedEventArgs(this, message));
+                                OnClientMessageReceived?.Invoke(null, new ClientMessageReceivedEventArgs(this, message.Item3));
                             }
                         }
                     }

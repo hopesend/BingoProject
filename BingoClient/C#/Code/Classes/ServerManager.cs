@@ -140,8 +140,11 @@ namespace BingoClient.Classes
                         {
                             byte[] bytesFrom = new byte[1024];
                             this.stream.Read(bytesFrom, 0, 1024);
-                            string message = Utils.SatinizeBytes(bytesFrom);
-                            this.ManageMessage(message);
+                            Tuple<Utils.MessageType, string, string> message = Utils.CastMessage(bytesFrom);
+                            if(message != null)
+                            {
+                                this.ManageMessage(message);
+                            }
                         }
                     }
                     catch
@@ -158,24 +161,23 @@ namespace BingoClient.Classes
         /// Gestion el mensaje recibido del servidor
         /// </summary>
         /// <param name="message"></param>
-        public void ManageMessage(string message)
+        public void ManageMessage(Tuple<Utils.MessageType, string, string> message)
         {
-            Tuple<Utils.MessageType, string, string> data = Utils.CastMessage(message);
-            switch (data.Item1)
+            switch (message.Item1)
             {
                 case Utils.MessageType.Chat:
                     {
-                        OnChatMessageSend?.Invoke(null, new ChatMessageEventArgs(data.Item2, data.Item3));
+                        OnChatMessageSend?.Invoke(null, new ChatMessageEventArgs(message.Item2, message.Item3));
                         break;
                     }
                 case Utils.MessageType.System:
                     {
-                        OnSystemMessageSend?.Invoke(null, new SystemMessageEventArgs(data.Item3));
+                        OnSystemMessageSend?.Invoke(null, new SystemMessageEventArgs(message.Item3));
                         break;
                     }
                 case Utils.MessageType.Ball:
                     {
-                        OnBallSend?.Invoke(null, new BallSendEventArgs(int.Parse(data.Item3)));
+                        OnBallSend?.Invoke(null, new BallSendEventArgs(int.Parse(message.Item3)));
                         break;
                     }
             }

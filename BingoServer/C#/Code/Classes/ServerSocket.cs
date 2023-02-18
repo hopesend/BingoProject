@@ -30,7 +30,7 @@ namespace BingoServer.Classes
         /// <summary>
         /// Ip del servidor
         /// </summary>
-        private IPAddress ip = IPAddress.Parse("127.0.0.1");
+        private IPAddress ip = IPAddress.Parse("0.0.0.0");
 
         public IPAddress Ip { get => ip; set => ip = value; }
 
