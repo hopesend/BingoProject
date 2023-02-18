@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BingoServer.ClientManager">
+    <Position X="3.25" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAARAkAACAAAAgAAgAAAAACIAACgAAAEAA=</HashCode>
+      <FileName>ClientManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BingoServer.ClientSocket" BaseTypeListCollapsed="true">
+    <Position X="5.5" Y="4.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAEQAAAAACAABAECAAAAACQQAgAEAQAAAAEAAAABAAA=</HashCode>
+      <FileName>ClientSocket.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="BingoServer.ClientDisconnectEventArgs">
+    <Position X="0.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>Events.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BingoServer.ClientMessageReceivedEventArgs">
+    <Position X="12.5" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAIAAAAAA=</HashCode>
+      <FileName>Events.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BingoServer.GameManager">
+    <Position X="9.25" Y="0.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AQACAgAACAAAAIAAAAAAQAAgACAAAAAAIAIAAAAAAFA=</HashCode>
+      <FileName>GameManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BingoServer.Program" Collapsed="true">
+    <Position X="13" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BingoServer.Ranking">
+    <Position X="3.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAQAAgAAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>Ranking.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BingoServer.ServerSocket">
+    <Position X="6.5" Y="0.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>BAAAAQAAAAAAAAAAAAAAAAAICAAAAAgAAAEgAAAAIAA=</HashCode>
+      <FileName>ServerSocket.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BingoServer.Utils">
+    <Position X="11" Y="4.75" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="BingoServer.Utils.MessageType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Utils.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Utils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
