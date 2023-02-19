@@ -46,12 +46,12 @@ namespace BingoServer
         /// <summary>
         /// Mensaje Enviado
         /// </summary>
-        public string Message { get; set; }
+        public MessageSocket Message { get; set; }
 
-        public ClientMessageReceivedEventArgs(ClientSocket socket, string message)
+        public ClientMessageReceivedEventArgs(ClientSocket socket, MessageSocket message)
         {
             this.socket = socket;
-            Message = message;
+            this.Message = message;
         }
     }
 }

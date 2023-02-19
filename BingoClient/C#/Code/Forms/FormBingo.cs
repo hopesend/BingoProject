@@ -76,7 +76,7 @@ namespace BingoClient.Forms
         private void CardBingo_OnBingoCaptured(object sender, EventArgs e)
         {
             //si se captura un bingo se manda un mensaje al servidor
-            this.managerServer.SendMessage(Utils.MessageType.System, this.config.TextUserName.Text, "BINGO");
+            this.managerServer.SendMessage(new MessageSocket(MessageType.System, this.config.TextUserName.Text, "BINGO"));
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace BingoClient.Forms
         private void CardBingo_OnLineCaptured(object sender, EventArgs e)
         {
             //si se captura una linea se manda un mensaje al servidor
-            this.managerServer.SendMessage(Utils.MessageType.System, this.config.TextUserName.Text, "LINE");
+            this.managerServer.SendMessage(new MessageSocket(MessageType.System, this.config.TextUserName.Text, "LINE"));
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace BingoClient.Forms
                 if (this.managerServer.ConnectToServer())
                 {
                     //enviamos un mensaje al servidor de que hemos conectado
-                    this.managerServer.SendMessage(Utils.MessageType.System, this.config.TextUserName.Text, this.config.TextUserName.Text);
+                    this.managerServer.SendMessage(new MessageSocket(MessageType.System, this.config.TextUserName.Text, this.config.TextUserName.Text));
                     //Marcamos como que hemos conectado
                     this.StatusBarLabel.Text = $"{this.config.TextUserName.Text} Is Connected";
                     //Cambiamos la marca del boton para su desconexion
@@ -226,7 +226,11 @@ namespace BingoClient.Forms
         private void ManagerServer_OnChatMessageSend(object sender, ChatMessageEventArgs e)
         {
             //escribimos un nuevo mensaje en el chat tras recibirlo del servidor
-            Invoke(new Action(() => this.ListChat.Items.Add(e.User + " says: " + e.Message)));
+            Invoke(new Action(() => 
+            {
+                this.ListChat.Items.Add(e.User + " says: " + e.Message);
+                this.ListChat.TopIndex = this.ListChat.Items.Count - 1;
+            }));
         }
 
         /// <summary>
@@ -239,7 +243,7 @@ namespace BingoClient.Forms
             if (!string.IsNullOrEmpty(TextChat.Text) && this.managerServer.IsConnected())
             {
                 //Enviamos un mensaje al servidor para decirle que hemos escrito en el chat
-                this.managerServer.SendMessage(Utils.MessageType.Chat, this.config.TextUserName.Text, TextChat.Text);
+                this.managerServer.SendMessage(new MessageSocket(MessageType.Chat, this.config.TextUserName.Text, TextChat.Text));
                 this.TextChat.Clear();
             }
         }

@@ -98,7 +98,7 @@ namespace BingoServer.Classes
             //Cuando se desconecta el cliente mandamos un mensaje a la consola
             Console.WriteLine("El Cliente " + e.socket.Name + " Se a desconectado del Juego");
             //Mandamos un mensaje a los demas clientes de que el cliente se a desconectado
-            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", e.socket.Name + " a abandonado la partida");
+            this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", e.socket.Name + " a abandonado la partida"));
             //Si se han desconectado todos los clientes se aborta la partida
             if (this.clientManager.GetCount() == 0)
             {
@@ -114,53 +114,61 @@ namespace BingoServer.Classes
         /// <param name="e"></param>
         private void ClientManager_OnClientMessageReceived(object sender, ClientMessageReceivedEventArgs e)
         {
-            //Formateamos el mensaje recibido del cliente
-            Tuple<Utils.MessageType, string, string> splitMessage = Utils.CastMessage(e.Message);
-
             //Repartimos el mensaje segun el tipo de mensaje
-            switch (splitMessage.Item1)
+            switch (e.Message.Type)
             {
-                case Utils.MessageType.Chat:
+                case MessageType.Chat:
+                {
+                    //si el mensaje contiene la palabra ranking se muestra el ranking actual de la sesion en al ventana de chat
+                    if (e.Message.Message.ToLower().Contains("ranking"))
                     {
-                        //si el mensaje contiene la palabra ranking se muestra el ranking actual de la sesion en al ventana de chat
-                        if (splitMessage.Item3.ToLower().Contains("ranking"))
+                        this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo","RAKINGS"));
+                        Thread.Sleep(50);
+                        this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", "-------"));
+                        Thread.Sleep(50);
+                        this.clientManager.GetRankings().ForEach(x =>
                         {
-                            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", "RAKINGS");
+                            this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", x.ToStringMessageSatinized()));
                             Thread.Sleep(50);
-                            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", "-------");
-                            Thread.Sleep(50);
-                            this.clientManager.GetRankings().ForEach(x =>
+                        });
+                    }
+                    else { this.clientManager.SendMessage(e.Message); }
+                    break;
+                }
+                case MessageType.System:
+                {
+                    switch (e.Message.Message)
+                    {
+                        case "BINGO":
                             {
-                                this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", x.ToStringMessageSatinized());
-                                Thread.Sleep(50);
-                            });
-                        }
-                        else { this.clientManager.SendMessage(splitMessage.Item1, splitMessage.Item2, splitMessage.Item3); }
-                        break;
+                                //Si el mensaje es un mensaje de bingo, se avisa a los clientes y se acaba el juego
+                                this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", $"El Jugador {e.Message.UserName} es el Ganador"));
+                                this.clientManager.SetBingo(e.Message.UserName);
+                                this.threadGame.Abort();
+                                Console.WriteLine("Se han desconectado todos los jugadores...");
+                                break;
+                            }
+                        case "LINE":
+                            {
+                                //Si el mensaje es un mensaje de linea, se avisa a los clientes
+                                this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", $"El Jugador {e.Message.UserName} a cantado Linea"));
+                                this.clientManager.SetLine(e.Message.UserName);
+                                break;
+                            }
+                        default:
+                            {
+                                (sender as ClientSocket).Name = e.Message.UserName;
+                                Console.WriteLine("Jugador " + e.Message.UserName + " Se unio al juego...");
+                                //se envian mensajes de que un nuevo jugador se a conectado
+                                this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", e.Message.UserName + " Se a unido al juego..."));
+                                this.clientManager.SendMessage(new MessageSocket(MessageType.Chat,
+                                                                "Bingo",
+                                                                $"Faltan {this.players - this.clientManager.GetCount()} jugadores para empezar el BINGO"));
+                                break;
+                            }
                     }
-                case Utils.MessageType.System:
-                    {
-                        switch (splitMessage.Item3)
-                        {
-                            case "BINGO":
-                                {
-                                    //Si el mensaje es un mensaje de bingo, se avisa a los clientes y se acaba el juego
-                                    this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", $"El Jugador {splitMessage.Item2} es el Ganador");
-                                    this.clientManager.SetBingo(splitMessage.Item2);
-                                    this.threadGame.Abort();
-                                    Console.WriteLine("Se han desconectado todos los jugadores...");
-                                    break;
-                                }
-                            case "LINE":
-                                {
-                                    //Si el mensaje es un mensaje de linea, se avisa a los clientes
-                                    this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", $"El Jugador {splitMessage.Item2} a cantado Linea");
-                                    this.clientManager.SetLine(splitMessage.Item2);
-                                    break;
-                                }
-                        }
-                        break;
-                    }
+                    break;
+                }
             }
         }
 
@@ -185,21 +193,9 @@ namespace BingoServer.Classes
                         {
                             //Se mantiene a la espera de la conexion de un Cliente
                             TcpClient clientSocket = this.serverSocket.AcceptClient();
-                            byte[] bytesFrom = new byte[1024];
-
-                            //Obtiene el mensaje del cliente al conectar
-                            NetworkStream networkStream = clientSocket.GetStream();
-                            networkStream.Read(bytesFrom, 0, 1024);
-                            Tuple<Utils.MessageType, string, string> info = Utils.CastMessage(bytesFrom);
 
                             //añade el cliente a la coleccion del gestor
-                            this.clientManager.AddClient(new ClientSocket(info.Item3, clientSocket));
-                            Console.WriteLine("Jugador " + this.clientManager.GetCount() + " Se unio al juego...");
-                            //se envian mensajes de que un nuevo jugador se a conectado
-                            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", info.Item3 + " Se a unido al juego...");
-                            this.clientManager.SendMessage(Utils.MessageType.Chat,
-                                                          "Bingo",
-                                                          $"Faltan {this.players - this.clientManager.GetCount()} jugadores para empezar el BINGO");
+                            this.clientManager.AddClient(new ClientSocket("", clientSocket));
                         }
                         catch (Exception e)
                         {
@@ -211,6 +207,8 @@ namespace BingoServer.Classes
 
                     //se cancela el socket de escucha
                     this.serverSocket.StopSocket();
+                    //Se espera hasta que se hayan hecho todas las presentaciones de Usuarios
+                    while (!this.clientManager.IsAllConnected());
                 }
                 catch (Exception e)
                 {
@@ -233,11 +231,11 @@ namespace BingoServer.Classes
             this.clientManager.SetRankings(rankings);
 
             //Se envian mensajes de que el juego va a comenzar
-            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", "Todos los jugadores se han unido al juego...");
-            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", "El juego comenzara en 10 segundos...");
+            this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", "Todos los jugadores se han unido al juego..."));
+            this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", "El juego comenzara en 10 segundos..."));
             Thread.Sleep(10000);
 
-            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", "Comienza el BINGO, Suerte a todos los participantes...");
+            this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", "Comienza el BINGO, Suerte a todos los participantes..."));
             //se inicia el hilo de juego
             this.threadGame = new Thread(() =>
             {
@@ -264,7 +262,7 @@ namespace BingoServer.Classes
                     for (int i = 0; i < 75; i++)
                     {
                         Thread.Sleep(this.delayTime * 1000);
-                        this.clientManager.SendMessage(Utils.MessageType.Ball, "Bingo", balls[i].ToString());
+                        this.clientManager.SendMessage(new MessageSocket(MessageType.Ball, "Bingo", balls[i].ToString()));
                     }
                     Console.WriteLine("Ya hay ganador ");
                 }
@@ -274,7 +272,7 @@ namespace BingoServer.Classes
             this.threadGame.Join();
 
             Console.WriteLine("El juego a finalizado");
-            this.clientManager.SendMessage(Utils.MessageType.Chat, "Bingo", "El BINGO a finalizado....");
+            this.clientManager.SendMessage(new MessageSocket(MessageType.Chat, "Bingo", "El BINGO a finalizado...."));
         }
 
         /// <summary>

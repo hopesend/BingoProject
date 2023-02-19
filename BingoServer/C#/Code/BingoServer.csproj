@@ -47,13 +47,13 @@
   <ItemGroup>
     <Compile Include="Classes\ClientManager.cs" />
     <Compile Include="Classes\ClientSocket.cs" />
+    <Compile Include="Classes\MessageSocket.cs" />
     <Compile Include="Events\Events.cs" />
     <Compile Include="Classes\GameManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classes\Ranking.cs" />
     <Compile Include="Classes\ServerSocket.cs" />
-    <Compile Include="Classes\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

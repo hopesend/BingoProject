@@ -114,11 +114,10 @@ namespace BingoClient.Classes
         /// <param name="type"></param>
         /// <param name="userName"></param>
         /// <param name="message"></param>
-        public void SendMessage(Utils.MessageType type, string userName, string message)
+        public void SendMessage(MessageSocket message)
         {
             //Formatea el mensaje y lo envia
-            string comMessage = Utils.CastMessage(type, userName, message);
-            byte[] data = Encoding.ASCII.GetBytes(comMessage);
+            byte[] data = Encoding.UTF8.GetBytes(message.ConstructMessage());
             this.stream.Write(data, 0, data.Length);
             this.stream.Flush();
         }
@@ -131,23 +130,22 @@ namespace BingoClient.Classes
             //Inicia el hilo de escucha
             new Thread(() =>
             {
-                for (; ; )
+                while (true)
                 {
                     try
                     {
-                        //Si el cliente esta conectado escucha a la espera de mensaje
-                        if (this.socket.Connected)
+                        //Hasta que haya informacion en el socket creamos un ciclo infinito
+                        while (!this.stream.DataAvailable) ;
+                        //Capturamos el mensaje
+                        byte[] bytesFrom = new byte[this.socket.Available];
+                        stream.Read(bytesFrom, 0, bytesFrom.Length);
+                        //Limpia el mensaje y si es un mensaje formateado correctamente emite el evento
+                        if (bytesFrom.Length != 0)
                         {
-                            byte[] bytesFrom = new byte[1024];
-                            this.stream.Read(bytesFrom, 0, 1024);
-                            Tuple<Utils.MessageType, string, string> message = Utils.CastMessage(bytesFrom);
-                            if(message != null)
-                            {
-                                this.ManageMessage(message);
-                            }
+                            MessageSocket.SatinizeMessage(Encoding.UTF8.GetString(bytesFrom)).ForEach(x => this.ManageMessage(x));
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         //Si el cliente desconecta, se emite el evento y si sale del for
                         OnClientDisconnected?.Invoke(null, EventArgs.Empty);
@@ -161,25 +159,25 @@ namespace BingoClient.Classes
         /// Gestion el mensaje recibido del servidor
         /// </summary>
         /// <param name="message"></param>
-        public void ManageMessage(Tuple<Utils.MessageType, string, string> message)
+        public void ManageMessage(MessageSocket message)
         {
-            switch (message.Item1)
+            switch (message.Type)
             {
-                case Utils.MessageType.Chat:
-                    {
-                        OnChatMessageSend?.Invoke(null, new ChatMessageEventArgs(message.Item2, message.Item3));
-                        break;
-                    }
-                case Utils.MessageType.System:
-                    {
-                        OnSystemMessageSend?.Invoke(null, new SystemMessageEventArgs(message.Item3));
-                        break;
-                    }
-                case Utils.MessageType.Ball:
-                    {
-                        OnBallSend?.Invoke(null, new BallSendEventArgs(int.Parse(message.Item3)));
-                        break;
-                    }
+                case MessageType.Chat:
+                {
+                    OnChatMessageSend?.Invoke(null, new ChatMessageEventArgs(message.UserName, message.Message));
+                    break;
+                }
+                case MessageType.System:
+                {
+                    OnSystemMessageSend?.Invoke(null, new SystemMessageEventArgs(message.Message));
+                    break;
+                }
+                case MessageType.Ball:
+                {
+                    OnBallSend?.Invoke(null, new BallSendEventArgs(int.Parse(message.Message)));
+                    break;
+                }
             }
         }
 

@@ -15,6 +15,7 @@
 // ***********************************************************************
 using System;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 
 namespace BingoServer.Classes
@@ -31,7 +32,15 @@ namespace BingoServer.Classes
         /// </summary>
         private string name;
 
-        public string Name { get => name; set => name = value; }
+        public string Name 
+        { 
+            get => name;
+            set
+            {
+                name = value;
+                this.ranking = new Ranking { Name = name };
+            }
+        }
 
         /// <summary>
         /// Socket del cliente
@@ -41,20 +50,13 @@ namespace BingoServer.Classes
         public TcpClient Socket { get => socket; set => socket = value; }
 
         private Ranking ranking;
-        /// <summary>
-        /// Numero de bingos en la partida
-        /// </summary>
-        //private int Bingo;
-
-        /// <summary>
-        /// Numero de lineas en la partida
-        /// </summary>
-        //private int Line;
 
         /// <summary>
         /// Hilo para la escucha de mensajes del cliente
         /// </summary>
         private Thread threadListen;
+
+        private NetworkStream stream;
 
         #endregion Variables
 
@@ -84,6 +86,7 @@ namespace BingoServer.Classes
             this.Name = name;
             this.Socket = socket;
             this.ranking = new Ranking { Name = name };
+            this.stream = socket.GetStream();
         }
 
         #endregion Constructor
@@ -98,26 +101,22 @@ namespace BingoServer.Classes
             //Creamos el hilo de escucha
             this.threadListen = new Thread(() =>
             {
-                for (; ; )
+                while (true)
                 {
                     try
                     {
-                        //Si el socket esta conectado escuchamos
-                        if (this.socket.Connected)
+                        //Hasta que haya informacion en el socket creamos un ciclo infinito
+                        while (!this.stream.DataAvailable) ;
+                        //Capturamos el mensaje
+                        byte[] bytesFrom = new byte[this.socket.Available];
+                        stream.Read(bytesFrom, 0, bytesFrom.Length);
+                        //Limpia el mensaje y si es un mensaje formateado correctamente emite el evento
+                        if (bytesFrom.Length != 0)
                         {
-                            //espera hasta la captura de un nuevo mensaje
-                            byte[] bytesFrom = new byte[1024];
-                            NetworkStream networkStream = this.socket.GetStream();
-                            networkStream.Read(bytesFrom, 0, 1024);
-                            //Limpia el mensaje y si es un mensaje formateado correctamente emite el evento
-                            Tuple<Utils.MessageType, string, string> message = Utils.CastMessage(bytesFrom);
-                            if (message != null)
-                            {
-                                OnClientMessageReceived?.Invoke(null, new ClientMessageReceivedEventArgs(this, message.Item3));
-                            }
+                            MessageSocket.SatinizeMessage(Encoding.UTF8.GetString(bytesFrom)).ForEach(x => OnClientMessageReceived?.Invoke(this, new ClientMessageReceivedEventArgs(this, x)));
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         //Si se desconecta el cliente rompemos el bucle y emitimos el evento
                         OnClientDisconnected?.Invoke(null, new ClientDisconnectEventArgs(this));

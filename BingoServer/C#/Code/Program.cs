@@ -29,7 +29,7 @@ namespace BingoServer
 
             //Puerto
             int port = 6666;
-            int retardo = 5;
+            int retardo = 10;
 
             Console.Clear();
             Console.WriteLine("Bingo Server v." + Assembly.GetExecutingAssembly().GetName().Version.ToString());
@@ -41,7 +41,7 @@ namespace BingoServer
                int.TryParse(puertoSeleccionado, out int puertoCast) &&
                (puertoCast >= 0 && puertoCast <= 65535)) { port = puertoCast; }
 
-            Console.Write("Retardo de Bola (Enter -> 5 segundos): ");
+            Console.Write("Retardo de Bola (Enter -> 10 segundos): ");
             string retardoSeleccionado = Console.ReadLine();
             if (!string.IsNullOrEmpty(retardoSeleccionado) &&
                int.TryParse(retardoSeleccionado, out int retardoCast) &&
@@ -54,7 +54,7 @@ namespace BingoServer
                 Console.Write("Cantidad de Jugadores: ");
                 string select = Console.ReadLine();
                 int players = 0;
-                while (!int.TryParse(select, out players) || players < 1)
+                while (!int.TryParse(select, out players) || players <= 1)
                 {
                     Console.WriteLine("Error... (Se necesitan mas de 1 jugador):");
                     Console.Write("Cantidad de Jugadores: ");

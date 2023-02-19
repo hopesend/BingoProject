@@ -84,7 +84,7 @@ namespace BingoServer.Classes
         /// <param name="e"></param>
         private void Socket_OnClientMessageReceived(object sender, ClientMessageReceivedEventArgs e)
         {
-            OnClientMessageReceived?.Invoke(null, e);
+            OnClientMessageReceived?.Invoke(sender, e);
         }
 
         /// <summary>
@@ -108,6 +108,11 @@ namespace BingoServer.Classes
         /// <returns></returns>
         public int GetCount() => this.sockets.Count;
 
+        public bool IsAllConnected()
+        {
+            return !this.sockets.Exists(x => string.IsNullOrEmpty(x.Name));
+        }
+
         /// <summary>
         /// Obtiene los sockets de los clientes conectados
         /// </summary>
@@ -120,7 +125,7 @@ namespace BingoServer.Classes
         /// <param name="type"></param>
         /// <param name="userName"></param>
         /// <param name="message"></param>
-        public void SendMessage(Utils.MessageType type, string userName, string message)
+        public void SendMessage(MessageSocket message)
         {
             try
             {
@@ -129,7 +134,7 @@ namespace BingoServer.Classes
                 {
                     //Casteamos el mensaje y lo mandamos
                     NetworkStream broadcastStream = clientSocket.GetStream();
-                    byte[] broadcastBytes = Encoding.ASCII.GetBytes(Utils.CastMessage(type, userName, message));
+                    byte[] broadcastBytes = Encoding.UTF8.GetBytes(message.ConstructMessage());
                     broadcastStream.Write(broadcastBytes, 0, broadcastBytes.Length);
                     broadcastStream.Flush();
                 }
