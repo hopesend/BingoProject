@@ -226,7 +226,7 @@ namespace BingoClient.Forms
         private void ManagerServer_OnChatMessageSend(object sender, ChatMessageEventArgs e)
         {
             //escribimos un nuevo mensaje en el chat tras recibirlo del servidor
-            Invoke(new Action(() => 
+            Invoke(new Action(() =>
             {
                 this.ListChat.Items.Add(e.User + " says: " + e.Message);
                 this.ListChat.TopIndex = this.ListChat.Items.Count - 1;

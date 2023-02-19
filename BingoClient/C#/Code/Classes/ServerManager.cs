@@ -139,14 +139,15 @@ namespace BingoClient.Classes
                         //Capturamos el mensaje
                         byte[] bytesFrom = new byte[this.socket.Available];
                         stream.Read(bytesFrom, 0, bytesFrom.Length);
-                        //Limpia el mensaje y si es un mensaje formateado correctamente emite el evento
+                        //Checkea que no sea un mensaje vacio
                         if (bytesFrom.Length != 0)
                         {
+                            //Desencripta el mensaje y checkea si es para (BingoProject)
                             string decryptMessage = Security.Decrypt(Encoding.UTF8.GetString(bytesFrom));
                             if (!string.IsNullOrEmpty(decryptMessage) && decryptMessage.StartsWith("(BingoProject)"))
                             {
                                 MessageSocket.SatinizeMessage(decryptMessage).ForEach(x => this.ManageMessage(x));
-                            } 
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -168,20 +169,20 @@ namespace BingoClient.Classes
             switch (message.Type)
             {
                 case MessageType.Chat:
-                {
-                    OnChatMessageSend?.Invoke(null, new ChatMessageEventArgs(message.UserName, message.Message));
-                    break;
-                }
+                    {
+                        OnChatMessageSend?.Invoke(null, new ChatMessageEventArgs(message.UserName, message.Message));
+                        break;
+                    }
                 case MessageType.System:
-                {
-                    OnSystemMessageSend?.Invoke(null, new SystemMessageEventArgs(message.Message));
-                    break;
-                }
+                    {
+                        OnSystemMessageSend?.Invoke(null, new SystemMessageEventArgs(message.Message));
+                        break;
+                    }
                 case MessageType.Ball:
-                {
-                    OnBallSend?.Invoke(null, new BallSendEventArgs(int.Parse(message.Message)));
-                    break;
-                }
+                    {
+                        OnBallSend?.Invoke(null, new BallSendEventArgs(int.Parse(message.Message)));
+                        break;
+                    }
             }
         }
 
