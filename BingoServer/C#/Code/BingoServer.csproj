@@ -48,6 +48,7 @@
     <Compile Include="Classes\ClientManager.cs" />
     <Compile Include="Classes\ClientSocket.cs" />
     <Compile Include="Classes\MessageSocket.cs" />
+    <Compile Include="Classes\Security.cs" />
     <Compile Include="Events\Events.cs" />
     <Compile Include="Classes\GameManager.cs" />
     <Compile Include="Program.cs" />

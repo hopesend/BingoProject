@@ -134,7 +134,7 @@ namespace BingoServer.Classes
                 {
                     //Casteamos el mensaje y lo mandamos
                     NetworkStream broadcastStream = clientSocket.GetStream();
-                    byte[] broadcastBytes = Encoding.UTF8.GetBytes(message.ConstructMessage());
+                    byte[] broadcastBytes = Encoding.UTF8.GetBytes(Security.Encrypt(message.ConstructMessage()));
                     broadcastStream.Write(broadcastBytes, 0, broadcastBytes.Length);
                     broadcastStream.Flush();
                 }

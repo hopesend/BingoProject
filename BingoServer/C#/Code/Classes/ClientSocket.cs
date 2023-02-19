@@ -32,8 +32,8 @@ namespace BingoServer.Classes
         /// </summary>
         private string name;
 
-        public string Name 
-        { 
+        public string Name
+        {
             get => name;
             set
             {
@@ -110,10 +110,16 @@ namespace BingoServer.Classes
                         //Capturamos el mensaje
                         byte[] bytesFrom = new byte[this.socket.Available];
                         stream.Read(bytesFrom, 0, bytesFrom.Length);
-                        //Limpia el mensaje y si es un mensaje formateado correctamente emite el evento
+                        //Checkea que el mensaje no sea un mensaje vacio
                         if (bytesFrom.Length != 0)
                         {
-                            MessageSocket.SatinizeMessage(Encoding.UTF8.GetString(bytesFrom)).ForEach(x => OnClientMessageReceived?.Invoke(this, new ClientMessageReceivedEventArgs(this, x)));
+                            //Desencripta el mensaje y checkea que sea un mensaje para (BingoProject)
+                            string decryptMessage = Security.Decrypt(Encoding.UTF8.GetString(bytesFrom));
+                            if (!string.IsNullOrEmpty(decryptMessage) && decryptMessage.StartsWith("(BingoProject)"))
+                            {
+                                MessageSocket.SatinizeMessage(decryptMessage)
+                                    .ForEach(x => OnClientMessageReceived?.Invoke(this, new ClientMessageReceivedEventArgs(this, x)));
+                            }
                         }
                     }
                     catch (Exception ex)

@@ -42,20 +42,21 @@ namespace BingoClient.Classes
 
         public MessageSocket(string message)
         {
-            message = message.TrimStart('(').TrimEnd(')');
-            this.Type = (MessageType)Enum.Parse(typeof(MessageType), message.Split(':').First().TrimStart('#').TrimEnd('#'));
-            this.UserName = message.Split(':')[1].TrimStart('#').TrimEnd('#');
-            this.Message = message.Split(':').Last().TrimStart('#').TrimEnd('#');
+            message = message.Replace("(startM)", "").Replace("(endM)", "").Replace("(BingoProject)", "");
+            string[] messageSplit = message.Split(new string[] { "(endB)" }, StringSplitOptions.None);
+            this.Type = (MessageType)Enum.Parse(typeof(MessageType), messageSplit[0].Replace("(startB)", string.Empty));
+            this.UserName = messageSplit[1].Replace("(startB)", string.Empty);
+            this.Message = messageSplit[2].Replace("(startB)", string.Empty);
         }
 
-        public string ConstructMessage() => $"(#{this.Type}#:#{this.UserName}#:#{this.Message}#)";
+        public string ConstructMessage() => $"(BingoProject)(startM)(startB){this.Type}(endB)(startB){this.UserName}(endB)(startB){this.Message}(endB)(endM)";
 
         public static List<MessageSocket> SatinizeMessage(string message)
         {
             List<MessageSocket> messages = new List<MessageSocket>();
-            foreach (string messageClean in message.Split(')').Where(x => !string.IsNullOrEmpty(x)))
+            foreach (string messageClean in message.Split(new string[] { "(endM)" }, StringSplitOptions.None).Where(x => !string.IsNullOrEmpty(x)))
             {
-                messages.Add(new MessageSocket(messageClean + ")"));
+                messages.Add(new MessageSocket(messageClean + "(endM)"));
             }
             return messages;
         }

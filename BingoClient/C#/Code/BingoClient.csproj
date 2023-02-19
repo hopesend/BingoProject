@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\MessageSocket.cs" />
+    <Compile Include="Classes\Security.cs" />
     <Compile Include="Controls\BingoCard.cs">
       <SubType>Component</SubType>
     </Compile>

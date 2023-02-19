@@ -117,7 +117,7 @@ namespace BingoClient.Classes
         public void SendMessage(MessageSocket message)
         {
             //Formatea el mensaje y lo envia
-            byte[] data = Encoding.UTF8.GetBytes(message.ConstructMessage());
+            byte[] data = Encoding.UTF8.GetBytes(Security.Encrypt(message.ConstructMessage()));
             this.stream.Write(data, 0, data.Length);
             this.stream.Flush();
         }
@@ -142,7 +142,11 @@ namespace BingoClient.Classes
                         //Limpia el mensaje y si es un mensaje formateado correctamente emite el evento
                         if (bytesFrom.Length != 0)
                         {
-                            MessageSocket.SatinizeMessage(Encoding.UTF8.GetString(bytesFrom)).ForEach(x => this.ManageMessage(x));
+                            string decryptMessage = Security.Decrypt(Encoding.UTF8.GetString(bytesFrom));
+                            if (!string.IsNullOrEmpty(decryptMessage) && decryptMessage.StartsWith("(BingoProject)"))
+                            {
+                                MessageSocket.SatinizeMessage(decryptMessage).ForEach(x => this.ManageMessage(x));
+                            } 
                         }
                     }
                     catch (Exception ex)
